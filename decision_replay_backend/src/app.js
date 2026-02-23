@@ -22,6 +22,9 @@ app.set('trust proxy', String(process.env.TRUST_PROXY || 'true').toLowerCase() =
 app.use(requestContext);
 
 // CORS
+// Notes for Next.js preview integration:
+// - We enable credentials so cookies can be used if/when the frontend migrates to cookie-based sessions.
+// - We explicitly support common request headers used by modern browsers/frameworks.
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -31,9 +34,23 @@ app.use(
       return callback(new ApiError(403, 'CORS_BLOCKED', 'Origin not allowed by CORS policy.'), false);
     },
     methods: (process.env.ALLOWED_METHODS || 'GET,POST,PUT,DELETE,PATCH,OPTIONS').split(','),
-    allowedHeaders: (process.env.ALLOWED_HEADERS || 'Content-Type,Authorization').split(','),
+    allowedHeaders: (
+      process.env.ALLOWED_HEADERS ||
+      'Content-Type,Authorization,X-Requested-With,X-Request-Id'
+    )
+      .split(',')
+      .map((h) => h.trim())
+      .filter(Boolean),
+    exposedHeaders: (
+      process.env.EXPOSED_HEADERS ||
+      'X-Request-Id'
+    )
+      .split(',')
+      .map((h) => h.trim())
+      .filter(Boolean),
     maxAge: process.env.CORS_MAX_AGE ? Number(process.env.CORS_MAX_AGE) : 3600,
     credentials: true,
+    optionsSuccessStatus: 204,
   })
 );
 

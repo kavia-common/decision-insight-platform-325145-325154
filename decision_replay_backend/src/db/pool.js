@@ -22,12 +22,14 @@ function buildPgConfigFromEnv() {
   }
 
   // Fallback to discrete vars.
+  // IMPORTANT: avoid hardcoded port defaults. In the platform, POSTGRES_PORT is provided.
+  // If you run locally, set POSTGRES_PORT explicitly (or use POSTGRES_URL).
   return {
     host: process.env.POSTGRES_HOST || 'localhost',
     user: process.env.POSTGRES_USER,
     password: process.env.POSTGRES_PASSWORD,
     database: process.env.POSTGRES_DB,
-    port: process.env.POSTGRES_PORT ? Number(process.env.POSTGRES_PORT) : 5432,
+    port: process.env.POSTGRES_PORT ? Number(process.env.POSTGRES_PORT) : undefined,
     max: process.env.PG_POOL_MAX ? Number(process.env.PG_POOL_MAX) : 10,
     idleTimeoutMillis: process.env.PG_IDLE_TIMEOUT_MS ? Number(process.env.PG_IDLE_TIMEOUT_MS) : 30_000,
     statement_timeout: process.env.PG_STATEMENT_TIMEOUT_MS
